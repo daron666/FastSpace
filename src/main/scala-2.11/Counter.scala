@@ -23,7 +23,7 @@ class Counter(game: ActorRef) extends Actor{
   }
 
   private def nextDuration(): Long = {
-    (2 + random.nextDouble() * 2).toLong
+    ((2 + random.nextDouble() * 2) * 1000).toLong
   }
 }
 
