@@ -36,7 +36,7 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
       context stop self
     case InputData(message) =>
       if (!finished || (finished && message != " ")) {
-        sender() ! Lost(lostMessage)
+        sender() ! Lost(lostFaultStartesMessage)
         getAnotherPlayers(sender(),players) foreach { p => p ! Won(winAfterFaultOpponent)}
       } else {
         sender() ! Won(winMessage)

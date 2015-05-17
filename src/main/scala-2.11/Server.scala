@@ -67,6 +67,7 @@ object Server {
   val winAfterFaultOpponent = "You've WON! You opponent have fault started!\r\n"
   val gameFinishedMessage = "Game just have finished! Thanks for participating.\r\n"
   val playerStoppedByGameMessage = "Player #{} have stopped by game"
+  val lostFaultStartesMessage = "You have fault started and you've lost!"
 
   def serverProps(host: String,port: Int): Props = Props(new Server(host, port))
 }
