@@ -1,24 +1,30 @@
 import akka.actor.{Props, ActorRef, Actor}
 import akka.event.Logging
 
+import scala.util.Random
+
 class Counter(game: ActorRef) extends Actor{
   import CounterProtocol._
 
   val log = Logging(context.system, this)
+  val random = new Random()
 
   def receive = {
     case Count(message) =>
       log.info(message)
-      Thread.sleep(1000)
+      Thread.sleep(nextDuration())
       game ! Broadcast(1)
-      Thread.sleep(1000)
+      Thread.sleep(nextDuration())
       game ! Broadcast(2)
-      Thread.sleep(1000)
+      Thread.sleep(nextDuration())
       game ! Broadcast(3)
       log.info(s"Stopping counter #${self.path.toStringWithoutAddress}")
       context stop self
   }
 
+  private def nextDuration(): Long = {
+    (2 + random.nextDouble() * 2).toLong
+  }
 }
 
 object Counter {
