@@ -3,9 +3,6 @@ import akka.event.Logging
 import akka.io.Tcp._
 import akka.util.ByteString
 
-/**
- * Created by Jack Daniels on 17.05.2015.
- */
 class Player(connection: ActorRef, number: Int) extends Actor {
   import GameProtocol._
   import PlayerProtocol._
@@ -24,37 +21,31 @@ class Player(connection: ActorRef, number: Int) extends Actor {
 
   def receive = {
     case Welcome(message) => connection ! Write(ByteString(message))
-    case GameStart(message) => {
+    case GameStart(message) =>
       game = Some(sender())
       gameStarted = true
       connection ! Write(ByteString(message))
-    }
-    case Received(data) => {
+    case Received(data) =>
       if (isFirstMessage) {
         isFirstMessage = false
       } else if (gameStarted) {
         game match {
-          case Some(gameActorRef) => {
+          case Some(gameActorRef) =>
             gameActorRef ! InputData(data.utf8String.replaceAll("[\\r\\n]", ""))
-          }
           case None => Unit
         }
       }
-    }
-    case PeerClosed     => {
+    case PeerClosed =>
       log.info(s"Player #$number have disconnected")
       context stop self
-    }
     case Show(message) => connection ! Write(ByteString(message))
-    case Won(message) => {
+    case Won(message) =>
       connection ! Write(ByteString(message))
       winner = true
       context stop self
-    }
-    case Lost(message) =>  {
+    case Lost(message) =>
       connection ! Write(ByteString(message))
       context stop self
-    }
   }
 
   override def postStop() = {

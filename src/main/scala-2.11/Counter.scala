@@ -1,16 +1,13 @@
 import akka.actor.{Props, ActorRef, Actor}
 import akka.event.Logging
 
-/**
- * Created by Jack Daniels on 17.05.2015.
- */
 class Counter(game: ActorRef) extends Actor{
   import CounterProtocol._
 
   val log = Logging(context.system, this)
 
   def receive = {
-    case Count(message) => {
+    case Count(message) =>
       log.info(message)
       Thread.sleep(1000)
       game ! Broadcast(1)
@@ -20,7 +17,6 @@ class Counter(game: ActorRef) extends Actor{
       game ! Broadcast(3)
       log.info(s"Stopping counter #${self.path.toStringWithoutAddress}")
       context stop self
-    }
   }
 
 }

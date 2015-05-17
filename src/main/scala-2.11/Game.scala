@@ -1,9 +1,6 @@
 import akka.actor.{Actor, ActorRef, Props, Terminated}
 import akka.event.Logging
 
-/**
- * Created by Jack Daniels on 17.05.2015.
- */
 class Game(players: Seq[ActorRef], number:Int) extends Actor {
   import GameProtocol._
   import PlayerProtocol._
@@ -17,21 +14,19 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
   var finished = false
 
   def receive = {
-    case Broadcast(tick) => {
+    case Broadcast(tick) =>
       if (!finished) {
         if (tick == 3) {
           finished = true
         }
         players foreach { p => p ! Show(s"$tick\r\n") }
       }
-    }
-    case Start(message) => {
+    case Start(message) =>
       players foreach {p => p ! GameStart(gameStartMessage)}
       val counter = context.actorOf(Counter.counterProps(self),s"counter_$number")
       counter ! Count(s"Starting counter #$number")
       log.info(message)
-    }
-    case Terminated(player) => {
+    case Terminated(player) =>
       log.info(playerDisconnected, player.path.toStringWithoutAddress)
       finished = true
       getAnotherPlayers(player, players) foreach {p => {
@@ -39,8 +34,7 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
         }
       }
       context stop self
-    }
-    case InputData(message) => {
+    case InputData(message) =>
       if (!finished || (finished && message != " ")) {
         sender() ! Lost(lostMessage)
         getAnotherPlayers(sender(),players) foreach { p => p ! Won(winAfterFaultOpponent)}
@@ -50,7 +44,6 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
       }
       players foreach {p => p ! Show(gameFinishedMessage)}
       context stop self
-    }
   }
 
   private def getAnotherPlayers(current: ActorRef, all: Seq[ActorRef]): Seq[ActorRef] = {

@@ -1,9 +1,6 @@
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 
-/**
- * Created by Jack Daniels on 16.05.2015.
- */
 class Starter {
   val config = ConfigFactory.load()
   implicit val system = ActorSystem(config.getString("app.system"))

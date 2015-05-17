@@ -5,9 +5,6 @@ import akka.event.Logging
 import akka.io.Tcp._
 import akka.io.{IO, Tcp}
 
-/**
- * Created by Jack Daniels on 16.05.2015.
- */
 class Server(host: String, port: Int) extends Actor {
   import PlayerProtocol._
   import GameProtocol._
@@ -23,26 +20,24 @@ class Server(host: String, port: Int) extends Actor {
   IO(Tcp) ! Bind(self, new InetSocketAddress(host, port))
 
   def receive = {
-    case b @ Bound(localAddress) =>
+    case b@Bound(localAddress) =>
       log.info(bound, localAddress)
 
-    case c @ Connected(remote, local) =>
+    case c@Connected(remote, local) =>
       log.info(connectionAccepted)
-      val player = context.actorOf(Player.playerProps(sender(), connectionNum),s"player_$connectionNum")
+      val player = context.actorOf(Player.playerProps(sender(), connectionNum), s"player_$connectionNum")
       player ! Welcome(welcomeMessage)
       waitingPlayer match {
-        case Some(oldPlayer) => {
+        case Some(oldPlayer) =>
           log.info(creatingGame)
-          val game = context.actorOf(Game.gameProps(oldPlayer, player, gameNum),s"game_$gameNum")
+          val game = context.actorOf(Game.gameProps(oldPlayer, player, gameNum), s"game_$gameNum")
           gameNum += 1
           game ! Start(s"Game #$gameNum have started")
           context watch game
           waitingPlayer = None
-        }
-        case None => {
+        case None =>
           waitingPlayer = Some(player)
           log.info(playerAddedToQeueu)
-        }
       }
       connectionNum += 1
 
