@@ -8,6 +8,7 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
   import GameProtocol._
   import PlayerProtocol._
   import CounterProtocol._
+  import Server._
 
   val log = Logging(context.system, this)
 
@@ -25,29 +26,29 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
       }
     }
     case Start(message) => {
-      players foreach {p => p ! GameStart("We have found your opponent. Send me a space when you will see 3! \r\n")}
+      players foreach {p => p ! GameStart(gameStartMessage)}
       val counter = context.actorOf(Counter.counterProps(self),s"counter_$number")
       counter ! Count(s"Starting counter #$number")
       log.info(message)
     }
     case Terminated(player) => {
-      log.info(s"Game has watched termination of player ${player.path.toStringWithoutAddress}")
+      log.info(playerDisconnected, player.path.toStringWithoutAddress)
       finished = true
       getAnotherPlayers(player, players) foreach {p => {
-          p ! Won("You Have Just Won Cause Your Opponent Have Disconnected!\r\n")
+          p ! Won(winAfterDisconnect)
         }
       }
       context stop self
     }
     case InputData(message) => {
       if (!finished || (finished && message != " ")) {
-        sender() ! Lost("Sorry! You Have Just Lost.\r\n")
-        getAnotherPlayers(sender(),players) foreach { p => p ! Won("You've WON! You opponent have fault started!")}
+        sender() ! Lost(lostMessage)
+        getAnotherPlayers(sender(),players) foreach { p => p ! Won(winAfterFaultOpponent)}
       } else {
-        sender() ! Won("You Have Just Won!\r\n")
-        getAnotherPlayers(sender(),players) foreach { p => p ! Lost("You've Lost! You are not so fast.")}
+        sender() ! Won(winMessage)
+        getAnotherPlayers(sender(),players) foreach { p => p ! Lost(lostMessage)}
       }
-      players foreach {p => p ! Show("Game just have finished! Thanks for participating.\r\n")}
+      players foreach {p => p ! Show(gameFinishedMessage)}
       context stop self
     }
   }

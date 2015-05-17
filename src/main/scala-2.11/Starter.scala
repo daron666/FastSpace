@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
  */
 class Starter {
   val config = ConfigFactory.load()
-  implicit val system = ActorSystem("Fast_Space")
+  implicit val system = ActorSystem(config.getString("app.system"))
   val host = config.getString("app.host")
   val port = config.getInt("app.port")
 
@@ -21,7 +21,6 @@ class Starter {
     system.shutdown()
   }
 }
-
 
 object Starter extends App {
   val starter = new Starter()

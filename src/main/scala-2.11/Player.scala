@@ -9,6 +9,7 @@ import akka.util.ByteString
 class Player(connection: ActorRef, number: Int) extends Actor {
   import GameProtocol._
   import PlayerProtocol._
+  import Server._
 
   val log = Logging(context.system, this)
 
@@ -34,7 +35,6 @@ class Player(connection: ActorRef, number: Int) extends Actor {
       } else if (gameStarted) {
         game match {
           case Some(gameActorRef) => {
-            log.info(s"Data from player ${data.utf8String.replaceAll("[\\r\\n]", "")}")
             gameActorRef ! InputData(data.utf8String.replaceAll("[\\r\\n]", ""))
           }
           case None => Unit
@@ -58,8 +58,7 @@ class Player(connection: ActorRef, number: Int) extends Actor {
   }
 
   override def postStop() = {
-    log.info(s"Player #$number have stopped by game")
-
+    log.info(playerStoppedByGameMessage, number)
   }
 }
 
