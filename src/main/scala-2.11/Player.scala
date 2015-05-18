@@ -15,7 +15,6 @@ class Player(connection: ActorRef, number: Int) extends Actor {
   context.watch(connection)
 
   var game: Option[ActorRef] = None
-  var gameStarted = false
   var isFirstMessage = true
   var winner = false
 
@@ -23,12 +22,11 @@ class Player(connection: ActorRef, number: Int) extends Actor {
     case Welcome(message) => connection ! Write(ByteString(message))
     case GameStart(message) =>
       game = Some(sender())
-      gameStarted = true
       connection ! Write(ByteString(message))
     case Received(data) =>
       if (isFirstMessage) {
         isFirstMessage = false
-      } else if (gameStarted) {
+      } else if (isGameStarted()) {
         game match {
           case Some(gameActorRef) =>
             gameActorRef ! InputData(data.utf8String.replaceAll("[\\r\\n]", ""))
@@ -46,6 +44,13 @@ class Player(connection: ActorRef, number: Int) extends Actor {
     case Lost(message) =>
       connection ! Write(ByteString(message))
       context stop self
+  }
+
+  private def isGameStarted(): Boolean = {
+    game match {
+      case Some => true
+      case None => false
+    }
   }
 
   override def postStop() = {
