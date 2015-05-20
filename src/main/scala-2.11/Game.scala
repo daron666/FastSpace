@@ -23,8 +23,7 @@ class Game(players: Seq[ActorRef], number:Int) extends Actor {
       }
     case Start(message) =>
       players foreach {p => p ! GameStart(gameStartMessage)}
-      val counter = context.actorOf(Counter.counterProps(self),s"counter_$number")
-      counter ! Count(s"Starting counter #$number")
+      context.actorOf(Counter.counterProps(self),s"counter_$number")
       log.info(message)
     case Terminated(player) =>
       log.info(playerDisconnected, player.path.toStringWithoutAddress)

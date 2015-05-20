@@ -13,7 +13,6 @@ class CounterSpecs extends TestKit(ActorSystem("Counter_Tests")) with WordSpecLi
     "start when recived a start message and count." in {
       var messages = Seq[Int]()
       within(6 seconds,14 seconds) {
-        counter ! CounterProtocol.Count("Start")
         receiveWhile(idle = 5 seconds, messages = 3) {
           case Broadcast(v) => messages = v +: messages
         }

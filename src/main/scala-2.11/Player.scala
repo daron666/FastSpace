@@ -48,7 +48,7 @@ class Player(connection: ActorRef, number: Int) extends Actor {
 
   private def isGameStarted(): Boolean = {
     game match {
-      case Some => true
+      case Some(_) => true
       case None => false
     }
   }
